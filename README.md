@@ -81,3 +81,69 @@ AutoGen is useful for things like:
 **AutoGen** lets you program teams of AI agents — not just one chatbot — with structured communication, collaboration, and tool‑using ability. It’s great for building **multi‑step, multi‑agent systems** that go beyond simple prompt → answer interactions. ([Microsoft][1])
 
 ---
+
+
+
+
+
+
+
+
+
+
+
+
+
+Cool — I’ll assume you mean **“yes, I want to use AutoGen in Python.”**
+
+## What AutoGen is (in simple terms)
+
+**AutoGen** is a Microsoft open‑source framework for building **agentic AI apps**: instead of *one prompt → one answer*, you create **agents** (like roles) that can **chat, call tools, keep state, and even work as a team**. ([GitHub][1])
+
+In the current AutoGen docs, the easiest entry point is **AgentChat**, which gives you:
+
+* **AssistantAgent**: a built‑in “general” agent that can use tools ([Microsoft GitHub][2])
+* **run() / run_stream()**: run the agent once, or stream the conversation/events live ([Microsoft GitHub][2])
+* **Model clients**: adapters for models like OpenAI (example: `OpenAIChatCompletionClient`) ([Microsoft GitHub][3])
+
+## The minimum Python setup
+
+### 1) Install packages
+
+```bash
+pip install -U "autogen-agentchat" "autogen-ext[openai,azure]"
+```
+
+([Microsoft GitHub][4])
+
+### 2) Create a model client + agent, then run a task
+
+```python
+import asyncio
+from autogen_agentchat.agents import AssistantAgent
+from autogen_ext.models.openai import OpenAIChatCompletionClient
+
+async def main():
+    model_client = OpenAIChatCompletionClient(model="gpt-4o")  # uses OPENAI_API_KEY env var
+    agent = AssistantAgent(
+        name="assistant",
+        model_client=model_client,
+        system_message="You are helpful."
+    )
+
+    result = await agent.run(task="Explain AutoGen in 2 sentences.")
+    print(result.messages[-1].content)
+
+    await model_client.close()
+
+asyncio.run(main())
+```
+
+This matches the official “quickstart” pattern: **model_client → agent → run/run_stream → close**. ([Microsoft GitHub][4])
+
+## Where tools + MCP fit
+
+* Tools can be plain Python async functions (AutoGen turns them into callable “tools” the agent can use). ([Microsoft GitHub][4])
+* If you want **standardized external tools**, AutoGen also supports **MCP** via `autogen_ext.tools.mcp` and an MCP “workbench” concept. ([Microsoft GitHub][5])
+
+
